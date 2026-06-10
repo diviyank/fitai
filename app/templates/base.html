@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}fitai{% endblock %}</title>
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script src="/static/vendor/htmx.min.js" defer></script>
+  <script src="/static/vendor/alpine.min.js" defer></script>
+  <script src="/static/vendor/chart.min.js" defer></script>
+  <script src="/static/js/app.js" defer></script>
+</head>
+<body class="bg-slate-100 text-slate-900 pb-24">
+  <header class="bg-white/90 backdrop-blur border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
+    <span class="font-bold text-lg tracking-tight text-violet-600">{% block header %}fitai{% endblock %}</span>
+    <span class="flex items-center gap-3">
+      {% if user %}<span class="text-sm text-slate-500">{{ user.username }}</span>
+      <form action="/logout" method="post" class="inline">
+        <button class="text-slate-400" aria-label="{{ t('action.logout') }}">⎋</button>
+      </form>{% endif %}
+      <a href="/settings" aria-label="{{ t('nav.settings') }}" class="text-xl">⚙️</a>
+    </span>
+  </header>
+  <main class="px-4 py-4 max-w-xl mx-auto">
+    {% block content %}{% endblock %}
+  </main>
+  {% if user %}{% include "_nav.html" %}{% endif %}
+</body>
+</html>

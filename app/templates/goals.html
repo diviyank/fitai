@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Objectifs · fitai{% endblock %}
+{% block header %}{{ t('nav.metrics') }}{% endblock %}
+{% block content %}
+<h1 class="text-xl font-bold mb-4">Objectifs</h1>
+
+<form action="/goals/add" method="post" class="bg-white rounded-2xl border border-slate-200 p-4 space-y-2 mb-5">
+  <select name="type" class="w-full rounded-2xl border border-slate-200 px-3 py-2">
+    {% for g in goal_types %}<option value="{{ g }}">{{ g }}</option>{% endfor %}
+  </select>
+  <div class="flex gap-2">
+    <input name="target_value" placeholder="Cible (kg, etc.)" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
+    <input name="baseline_value" placeholder="Départ" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
+  </div>
+  <input name="target_date" type="date" class="w-full rounded-2xl border border-slate-200 px-3 py-2">
+  <input name="notes" placeholder="Notes" class="w-full rounded-2xl border border-slate-200 px-3 py-2">
+  <button class="w-full rounded-2xl bg-brand-500 text-white font-semibold py-2">{{ t('action.add') }}</button>
+</form>
+
+<div class="space-y-2">
+  {% for g in goals %}
+  <div class="bg-white rounded-2xl border border-slate-200 px-4 py-3 flex justify-between items-center text-sm">
+    <span><span class="font-medium">{{ g.type }}</span>
+      {% if g.target_value %}→ {{ g.target_value }}{% endif %}
+      <span class="text-slate-400">({{ g.status }})</span></span>
+    {% if g.status == 'active' %}
+    <form action="/goals/{{ g.id }}/retire" method="post">
+      <input type="hidden" name="status" value="achieved">
+      <button class="text-brand-600">✓ Atteint</button>
+    </form>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

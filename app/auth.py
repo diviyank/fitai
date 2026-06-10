@@ -26,6 +26,8 @@ def create_user(session: Session, username: str, password: str) -> User:
         raise UsernameTaken(username)
     user = User(username=username, password_hash=hash_password(password))
     session.add(user); session.commit(); session.refresh(user)
+    from .seed import ensure_profile
+    ensure_profile(session, user)
     return user
 
 

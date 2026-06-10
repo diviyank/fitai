@@ -109,6 +109,8 @@ def regenerate(plan_id: int, request: Request, session: Session = Depends(get_se
     p, profile, goal, summary = _load_context(session, user)
     exclude = [pl.get("label") for pl in plan.proposals_json]
     prompt = pb.build_plan(profile, goal, summary, plan.params_json, exclude=exclude)
+    if not (llm_client.is_configured() and p.use_llm_directly):
+        return _prompt_partial(request, prompt)
     try:
         parsed = rp.parse_plan_response(llm_client.complete(prompt))
     except (llm_client.LLMError, rp.ParseError):

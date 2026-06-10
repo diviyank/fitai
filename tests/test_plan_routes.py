@@ -64,3 +64,34 @@ def test_adapt_supersedes_and_creates_new_active(authed, session, user, fake_llm
     assert "superseded" in statuses
     active = [p for p in plans if p.status == "active"]
     assert len(active) == 1 and active[0].plan_json["label"] == "Adapté"
+
+
+def test_regenerate_falls_back_to_prompt_when_disabled(authed, session, user):
+    _prep_profile(session, user)
+    p = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
+    p.use_llm_directly = False; session.add(p); session.commit()
+    # Create a dummy plan to regenerate from (without triggering LLM)
+    plan = TrainingPlan(user_id=user.id, params_json={"n_weeks": 4},
+                        proposals_json=[{"label": "Dummy", "sessions": []}], status="proposed")
+    session.add(plan); session.commit(); session.refresh(plan)
+    r = authed.post(f"/plan/{plan.id}/regenerate")
+    assert r.status_code == 200 and "```" in r.text   # copy-paste prompt shown
+
+
+def test_regenerate_makes_one_call_and_excludes_seen(authed, session, user, fake_llm):
+    _prep_profile(session, user)
+    fake_llm["reply"] = THREE_PLANS
+    authed.post("/plan/generate", data={"n_weeks": "4"})
+    plan = session.exec(select(TrainingPlan).where(TrainingPlan.user_id == user.id)).first()
+    initial_calls = fake_llm["calls"]
+    # Set a new reply for the regenerate call
+    fake_llm["reply"] = json.dumps({"plans": [
+        {"label": f"Regenerated {x}", "sessions": [
+            {"week": 1, "day": 1, "title": "Nouveau Plan", "exercises": []}]}
+        for x in ["X", "Y"]]})
+    r = authed.post(f"/plan/{plan.id}/regenerate")
+    assert r.status_code == 200
+    assert fake_llm["calls"] == initial_calls + 1  # exactly one additional call
+    # Verify the prompt contains exclusion markers for the prior labels
+    last_prompt = fake_llm["prompts"][-1]
+    assert "Plan A" in last_prompt and "Plan B" in last_prompt and "Plan C" in last_prompt

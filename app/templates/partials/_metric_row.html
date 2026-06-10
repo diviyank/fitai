@@ -1,0 +1,8 @@
+<div class="bg-white rounded-2xl border border-slate-200 px-4 py-3 flex justify-between text-sm">
+  <span class="font-medium">{{ m.date }}</span>
+  <span class="text-slate-500 flex gap-3">
+    {% if m.weight_kg %}<span>{{ m.weight_kg }} kg</span>{% endif %}
+    {% if m.steps %}<span>{{ m.steps }} pas</span>{% endif %}
+    {% if m.energy %}<span>⚡{{ m.energy }}</span>{% endif %}
+  </span>
+</div>

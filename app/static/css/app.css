@@ -1,2 +1,3 @@
 /* Dev placeholder. The Docker build replaces this with the full Tailwind output. */
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+[x-cloak] { display: none !important; }

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.metrics') }} · fitai{% endblock %}
+{% block header %}{{ t('nav.metrics') }}{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-xl font-bold">Suivi</h1>
+  <a href="/goals" class="text-sm text-brand-600 font-medium">Objectifs →</a>
+</div>
+
+<form action="/metrics/add" method="post" class="bg-white rounded-2xl border border-slate-200 p-4 space-y-2 mb-5">
+  <div class="flex gap-2">
+    <input name="entry_date" type="date" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
+    <input name="weight_kg" placeholder="Poids kg" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 w-28">
+  </div>
+  <div class="flex gap-2">
+    <input name="steps" placeholder="Pas" inputmode="numeric" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
+    <input name="body_fat_pct" placeholder="% gras" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 w-28">
+  </div>
+  <div class="flex gap-2">
+    <input name="energy" placeholder="Énergie 1-5" inputmode="numeric" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
+    <input name="sleep_hours" placeholder="Sommeil h" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
+    <input name="soreness" placeholder="Courbat. 1-5" inputmode="numeric" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
+  </div>
+  <input name="notes" placeholder="Notes" class="w-full rounded-2xl border border-slate-200 px-3 py-2">
+  <button class="w-full rounded-2xl bg-brand-500 text-white font-semibold py-2">{{ t('action.add') }}</button>
+</form>
+
+<h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">Historique</h2>
+<div class="space-y-2">
+  {% for m in history %}{% include "partials/_metric_row.html" %}{% endfor %}
+</div>
+{% endblock %}

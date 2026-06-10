@@ -50,3 +50,15 @@ class BodyMetric(SQLModel, table=True):
     sleep_hours: Optional[float] = None
     soreness: Optional[int] = None
     notes: str = ""
+
+
+class Goal(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    type: str = "general"  # see enums.GOAL_TYPES
+    target_value: Optional[float] = None
+    target_date: Optional[DateType] = None
+    baseline_value: Optional[float] = None
+    status: str = "active"  # active | achieved | abandoned
+    notes: str = ""
+    created_at: datetime = Field(default_factory=datetime.utcnow)

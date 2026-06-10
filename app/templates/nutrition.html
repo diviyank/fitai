@@ -38,7 +38,7 @@
 
 <form action="/nutrition/estimate" method="post" hx-post="/nutrition/estimate" hx-target="#estimate-out" hx-swap="innerHTML" class="mb-3">
   <button class="w-full rounded-2xl border border-brand-500 text-brand-600 font-semibold py-2">
-    Estimer les repas du jour (1 appel)</button>
+    {{ t('nutrition.estimate') }} (1 appel)</button>
 </form>
 <div id="estimate-out" class="mb-4"></div>
 

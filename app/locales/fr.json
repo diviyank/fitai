@@ -13,5 +13,17 @@
   "auth.register": "Créer un compte",
   "auth.username": "Nom d'utilisateur",
   "auth.password": "Mot de passe",
-  "error.parse": "Réponse non reconnue — vérifiez que vous avez copié le bloc complet (le bloc ```json ... ```)."
+  "error.parse": "Réponse non reconnue — vérifiez que vous avez copié le bloc complet (le bloc ```json ... ```).",
+  "plan.generate": "Générer le programme",
+  "plan.adapt": "Adapter",
+  "plan.choose": "Choisir ce programme",
+  "plan.others": "Autres programmes",
+  "workout.log": "Enregistrer la séance",
+  "workout.start": "Commencer la séance",
+  "nutrition.estimate": "Estimer les repas du jour",
+  "nutrition.target": "Cible",
+  "metrics.quick": "Saisie rapide",
+  "goals.title": "Objectifs",
+  "home.today_session": "Séance du jour",
+  "home.this_week": "Cette semaine"
 }

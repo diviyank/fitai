@@ -21,17 +21,17 @@
 
 <form action="/plan/adapt" method="post" hx-post="/plan/adapt" hx-target="#plan-out" hx-swap="innerHTML"
       class="bg-white rounded-2xl border border-slate-200 p-4 space-y-2 mb-3">
-  <p class="text-sm font-semibold">Adapter le programme</p>
+  <p class="text-sm font-semibold">{{ t('plan.adapt') }}</p>
   <textarea name="feedback" placeholder="Ton retour (ex: le genou tire, trop facile…)"
             class="w-full rounded-2xl border border-slate-200 px-3 py-2"></textarea>
-  <button class="w-full rounded-2xl bg-brand-500 text-white font-semibold py-2">Adapter</button>
+  <button class="w-full rounded-2xl bg-brand-500 text-white font-semibold py-2">{{ t('plan.adapt') }}</button>
 </form>
 {% else %}
 <form action="/plan/generate" method="post" hx-post="/plan/generate" hx-target="#plan-out" hx-swap="innerHTML"
       class="bg-white rounded-2xl border border-slate-200 p-4 space-y-2 mb-3">
   <label class="block text-sm">Durée (semaines)
     <input type="number" name="n_weeks" value="4" class="w-full rounded-2xl border border-slate-200 px-3 py-2 mt-1"></label>
-  <button class="w-full rounded-2xl bg-brand-500 text-white font-semibold py-2">Générer le programme</button>
+  <button class="w-full rounded-2xl bg-brand-500 text-white font-semibold py-2">{{ t('plan.generate') }}</button>
 </form>
 {% endif %}
 <div id="plan-out"></div>

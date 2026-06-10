@@ -4,7 +4,7 @@
 {% block content %}
 <p class="text-sm text-slate-500">Bonjour, {{ user.username }}</p>
 
-<p class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mt-4 mb-2">Séance du jour</p>
+<p class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mt-4 mb-2">{{ t('home.today_session') }}</p>
 {% if today_session %}
 <a href="/workouts/session/{{ today_session.id }}"
    class="block rounded-2xl p-5 mb-5 text-white shadow-lg shadow-brand-500/30"
@@ -13,7 +13,7 @@
     Semaine {{ today_session.week_index }} · {{ today_session.focus or 'séance' }}</span>
   <h2 class="text-2xl font-extrabold mt-1">{{ today_session.title }}</h2>
   <p class="text-sm opacity-80 mt-1">{{ today_session.exercises_json|length }} exercices</p>
-  <span class="inline-block mt-4 rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold">▶ Commencer la séance</span>
+  <span class="inline-block mt-4 rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold">▶ {{ t('workout.start') }}</span>
 </a>
 {% else %}
 <a href="/plan" class="block rounded-2xl bg-white border border-slate-200 p-5 mb-5 text-center text-slate-500">
@@ -21,7 +21,7 @@
 {% endif %}
 
 {% if week_sessions %}
-<p class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-2">Cette semaine</p>
+<p class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-2">{{ t('home.this_week') }}</p>
 <div class="flex gap-2 overflow-x-auto pb-2 mb-5">
   {% for s in week_sessions %}
   <a href="/workouts/session/{{ s.id }}" class="shrink-0 bg-white rounded-2xl border border-slate-200 px-3 py-2 text-center">

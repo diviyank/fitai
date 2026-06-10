@@ -9,8 +9,8 @@
     {% for g in goal_types %}<option value="{{ g }}">{{ g }}</option>{% endfor %}
   </select>
   <div class="flex gap-2">
-    <input name="target_value" placeholder="Cible (kg, etc.)" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
-    <input name="baseline_value" placeholder="Départ" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
+    <input name="target_value" placeholder="Cible (kg, etc.)" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1 min-w-0">
+    <input name="baseline_value" placeholder="Départ" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1 min-w-0">
   </div>
   <input name="target_date" type="date" class="w-full rounded-2xl border border-slate-200 px-3 py-2">
   <input name="notes" placeholder="Notes" class="w-full rounded-2xl border border-slate-200 px-3 py-2">

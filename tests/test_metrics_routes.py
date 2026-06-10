@@ -25,6 +25,27 @@ def test_metrics_page_lists_history(authed):
     assert r.status_code == 200 and "80" in r.text
 
 
+def test_quick_add_saves_sleep_and_upserts(authed, session, user):
+    authed.post("/metrics/quick", data={"weight_kg": "80", "sleep_hours": ""})
+    authed.post("/metrics/quick", data={"weight_kg": "", "sleep_hours": "7.5"})
+    rows = session.exec(select(BodyMetric).where(BodyMetric.user_id == user.id)).all()
+    assert len(rows) == 1
+    assert rows[0].weight_kg == 80 and rows[0].sleep_hours == 7.5
+
+
+def test_quick_form_prefills_today(authed):
+    authed.post("/metrics/quick", data={"weight_kg": "78.4", "sleep_hours": "6.5"})
+    r = authed.get("/metrics/quick")
+    assert r.status_code == 200
+    assert 'value="78.4"' in r.text and 'value="6.5"' in r.text
+
+
+def test_quick_form_empty_when_no_today_row(authed):
+    r = authed.get("/metrics/quick")
+    assert r.status_code == 200
+    assert 'name="sleep_hours"' in r.text and 'value=""' in r.text
+
+
 def test_metrics_isolated_between_users(authed, client, session):
     from app import auth
     authed.post("/metrics/quick", data={"weight_kg": "70", "steps": "", "energy": ""})

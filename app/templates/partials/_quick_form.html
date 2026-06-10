@@ -1,0 +1,12 @@
+<p class="text-sm font-semibold mb-2">Saisie rapide</p>
+<form action="/metrics/quick" method="post" class="space-y-2">
+  <input name="weight_kg" value="{{ today.weight_kg if today and today.weight_kg is not none else '' }}"
+         placeholder="Poids kg" inputmode="decimal" class="w-full rounded-xl border border-slate-200 px-3 py-2">
+  <input name="steps" value="{{ today.steps if today and today.steps is not none else '' }}"
+         placeholder="Pas" inputmode="numeric" class="w-full rounded-xl border border-slate-200 px-3 py-2">
+  <input name="energy" value="{{ today.energy if today and today.energy is not none else '' }}"
+         placeholder="Énergie 1-5" inputmode="numeric" class="w-full rounded-xl border border-slate-200 px-3 py-2">
+  <input name="sleep_hours" value="{{ today.sleep_hours if today and today.sleep_hours is not none else '' }}"
+         placeholder="Sommeil h" inputmode="decimal" class="w-full rounded-xl border border-slate-200 px-3 py-2">
+  <button class="w-full rounded-xl bg-brand-500 text-white font-semibold py-2">{{ t('action.save') }}</button>
+</form>

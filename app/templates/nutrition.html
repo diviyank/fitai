@@ -23,23 +23,25 @@
   <input name="description" placeholder="Aliment / repas (ex: poulet riz brocoli)" required
          class="w-full rounded-2xl border border-slate-200 px-3 py-2">
   <div class="flex gap-2">
-    <select name="meal_slot" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
+    <select name="meal_slot" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1 min-w-0">
       {% for s in meal_slots %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
     </select>
     <input name="calories" placeholder="kcal (option.)" inputmode="numeric" class="rounded-2xl border border-slate-200 px-3 py-2 w-32">
   </div>
   <div class="flex gap-2">
-    <input name="protein_g" placeholder="P g" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
-    <input name="carbs_g" placeholder="G g" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
-    <input name="fat_g" placeholder="L g" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
+    <input name="protein_g" placeholder="P g" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1 min-w-0">
+    <input name="carbs_g" placeholder="G g" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1 min-w-0">
+    <input name="fat_g" placeholder="L g" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1 min-w-0">
   </div>
   <button class="w-full rounded-2xl bg-brand-500 text-white font-semibold py-2">{{ t('action.add') }}</button>
 </form>
 
-<form action="/nutrition/estimate" method="post" hx-post="/nutrition/estimate" hx-target="#estimate-out" hx-swap="innerHTML" class="mb-3">
+<form action="/nutrition/estimate" method="post" hx-post="/nutrition/estimate" hx-target="#estimate-out" hx-swap="innerHTML"
+      hx-indicator="#estimate-spinner" hx-disabled-elt="find button" class="mb-3">
   <button class="w-full rounded-2xl border border-brand-500 text-brand-600 font-semibold py-2">
     {{ t('nutrition.estimate') }} (1 appel)</button>
 </form>
+{% with id = "estimate-spinner" %}{% include "partials/_llm_spinner.html" %}{% endwith %}
 <div id="estimate-out" class="mb-4"></div>
 
 <div class="space-y-2">

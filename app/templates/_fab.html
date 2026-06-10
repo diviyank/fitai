@@ -1,13 +1,8 @@
 <div x-data="quickAdd()" class="fixed right-4 bottom-24 z-20">
   <button @click="toggle()" class="w-14 h-14 rounded-2xl bg-brand-500 text-white text-3xl font-light shadow-lg shadow-brand-500/40">+</button>
   <div x-show="open" x-cloak @click.outside="open=false"
+       hx-get="/metrics/quick" hx-trigger="load" hx-swap="innerHTML"
        class="absolute right-0 bottom-16 w-64 bg-white rounded-2xl border border-slate-200 shadow-xl p-4">
-    <p class="text-sm font-semibold mb-2">Saisie rapide</p>
-    <form action="/metrics/quick" method="post" class="space-y-2">
-      <input name="weight_kg" placeholder="Poids kg" inputmode="decimal" class="w-full rounded-xl border border-slate-200 px-3 py-2">
-      <input name="steps" placeholder="Pas" inputmode="numeric" class="w-full rounded-xl border border-slate-200 px-3 py-2">
-      <input name="energy" placeholder="Énergie 1-5" inputmode="numeric" class="w-full rounded-xl border border-slate-200 px-3 py-2">
-      <button class="w-full rounded-xl bg-brand-500 text-white font-semibold py-2">{{ t('action.save') }}</button>
-    </form>
+    <p class="text-sm text-slate-400">…</p>
   </div>
 </div>

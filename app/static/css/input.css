@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Hide Alpine-cloaked elements until Alpine initializes (the production build
+   replaces app.css with this Tailwind output, so the rule must live here). */
+[x-cloak] { display: none !important; }

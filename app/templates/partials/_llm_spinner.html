@@ -1,0 +1,17 @@
+{# Loading indicator for direct-LLM calls. Include with `id` and reference it from a
+   form's hx-indicator (e.g. hx-indicator="#plan-spinner"). The CSS is self-contained
+   so it animates without depending on the Tailwind build. #}
+<style>
+  .fitai-spinner {
+    width: 1rem; height: 1rem; border-radius: 9999px;
+    border: 2px solid #e7e1ff; border-top-color: #6d5efc;
+    display: inline-block; animation: fitai-spin .7s linear infinite;
+  }
+  @keyframes fitai-spin { to { transform: rotate(360deg); } }
+  /* htmx sets [disabled] on the button while the request is in flight. */
+  button[disabled] { opacity: .6; cursor: not-allowed; }
+</style>
+<div id="{{ id }}" class="htmx-indicator flex items-center justify-center gap-2 text-sm text-slate-500 my-3">
+  <span class="fitai-spinner" aria-hidden="true"></span>
+  <span>Claude réfléchit…</span>
+</div>

@@ -54,3 +54,25 @@ def streak(dates: list[date], today: date) -> int:
         count += 1
         cursor = date.fromordinal(cursor.toordinal() - 1)
     return count
+
+
+def build_context_summary(goal: Optional[dict], metrics: list[dict],
+                          workout_logs: list[dict], window_days: int, today: date) -> str:
+    """Compact, bounded text for plan/adapt prompts. Long-term trends are summarized;
+    only the last `window_days` of activity is counted in detail."""
+    lines: list[str] = []
+    trend = weight_trend(metrics, window=window_days)
+    if trend["current"] is not None:
+        delta = trend["delta"]
+        sign = "+" if (delta or 0) >= 0 else ""
+        lines.append(f"Poids actuel : {trend['current']} kg (variation {sign}{round(delta, 1)} kg).")
+    if goal and goal.get("baseline_value") and goal.get("target_value") and trend["current"] is not None:
+        pct = goal_progress(goal["baseline_value"], trend["current"], goal["target_value"])
+        lines.append(f"Objectif {goal.get('type')} : {round(pct)}% atteint.")
+    elif goal:
+        lines.append(f"Objectif : {goal.get('type')}.")
+    cutoff = date.fromordinal(today.toordinal() - window_days)
+    recent = [w for w in workout_logs if w.get("date") and w["date"] >= cutoff]
+    done = sum(1 for w in recent if w.get("status") == "done")
+    lines.append(f"Séances réalisées ({window_days} derniers jours) : {done} sur {len(recent)} prévues/loguées.")
+    return "\n".join(lines)

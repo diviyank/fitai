@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.settings') }} · fitai{% endblock %}
+{% block header %}{{ t('nav.settings') }}{% endblock %}
+{% block content %}
+<h1 class="text-xl font-bold mb-4">Réglages</h1>
+<form action="/settings" method="post" class="space-y-3">
+  <label class="block text-sm">Sexe
+    <select name="sex" class="w-full rounded-2xl border border-slate-200 px-4 py-2 mt-1">
+      {% for s in sexes %}<option value="{{ s }}" {% if profile.sex == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="block text-sm">Date de naissance
+    <input type="date" name="birth_date" value="{{ profile.birth_date or '' }}"
+           class="w-full rounded-2xl border border-slate-200 px-4 py-2 mt-1"></label>
+  <label class="block text-sm">Taille (cm)
+    <input type="number" step="0.1" name="height_cm" value="{{ profile.height_cm or '' }}"
+           class="w-full rounded-2xl border border-slate-200 px-4 py-2 mt-1"></label>
+  <label class="block text-sm">Niveau d'activité
+    <select name="activity_level" class="w-full rounded-2xl border border-slate-200 px-4 py-2 mt-1">
+      {% for a in activity_levels %}<option value="{{ a }}" {% if profile.activity_level == a %}selected{% endif %}>{{ a }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="block text-sm">Conditions / blessures
+    <textarea name="medical_conditions" class="w-full rounded-2xl border border-slate-200 px-4 py-2 mt-1">{{ profile.medical_conditions }}</textarea></label>
+  <label class="block text-sm">Préférences
+    <textarea name="preferences" class="w-full rounded-2xl border border-slate-200 px-4 py-2 mt-1">{{ profile.preferences }}</textarea></label>
+  <label class="block text-sm">Équipement disponible
+    <textarea name="equipment" class="w-full rounded-2xl border border-slate-200 px-4 py-2 mt-1">{{ profile.equipment }}</textarea></label>
+  <div class="flex gap-3">
+    <label class="block text-sm flex-1">Séances / semaine
+      <input type="number" name="days_per_week" value="{{ profile.days_per_week }}"
+             class="w-full rounded-2xl border border-slate-200 px-4 py-2 mt-1"></label>
+    <label class="block text-sm flex-1">Durée séance (min)
+      <input type="number" name="session_length_min" value="{{ profile.session_length_min }}"
+             class="w-full rounded-2xl border border-slate-200 px-4 py-2 mt-1"></label>
+  </div>
+  <label class="block text-sm">Objectif calorique manuel (optionnel)
+    <input type="number" name="calorie_target_override" value="{{ profile.calorie_target_override or '' }}"
+           class="w-full rounded-2xl border border-slate-200 px-4 py-2 mt-1"></label>
+  <label class="flex items-center gap-2 text-sm">
+    <input type="checkbox" name="use_llm_directly" {% if profile.use_llm_directly %}checked{% endif %}>
+    Génération directe avec Claude {% if not api_configured %}<span class="text-slate-400">(clé API non configurée)</span>{% endif %}
+  </label>
+  <button class="w-full rounded-2xl bg-brand-500 text-white font-semibold py-3">{{ t('action.save') }}</button>
+</form>
+{% endblock %}

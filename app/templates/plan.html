@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.program') }} · fitai{% endblock %}
+{% block header %}{{ t('nav.program') }}{% endblock %}
+{% block content %}
+<h1 class="text-xl font-bold mb-4">Programme</h1>
+
+{% if plan %}
+<div class="bg-white rounded-2xl border border-slate-200 p-4 mb-4">
+  <p class="font-semibold">{{ plan.plan_json.label }}</p>
+  <p class="text-xs text-slate-400">{{ sessions|length }} séances</p>
+</div>
+<div class="space-y-2 mb-5">
+  {% for s in sessions %}
+  <a href="/workouts/session/{{ s.id }}" class="block bg-white rounded-2xl border border-slate-200 px-4 py-3">
+    <span class="text-xs text-brand-600 font-semibold">S{{ s.week_index }} · J{{ s.day_index }}</span>
+    <p class="font-medium">{{ s.title }}</p>
+    <p class="text-xs text-slate-400">{{ s.focus or '' }} · {{ s.exercises_json|length }} exercices</p>
+  </a>
+  {% endfor %}
+</div>
+
+<form action="/plan/adapt" method="post" hx-post="/plan/adapt" hx-target="#plan-out" hx-swap="innerHTML"
+      class="bg-white rounded-2xl border border-slate-200 p-4 space-y-2 mb-3">
+  <p class="text-sm font-semibold">Adapter le programme</p>
+  <textarea name="feedback" placeholder="Ton retour (ex: le genou tire, trop facile…)"
+            class="w-full rounded-2xl border border-slate-200 px-3 py-2"></textarea>
+  <button class="w-full rounded-2xl bg-brand-500 text-white font-semibold py-2">Adapter</button>
+</form>
+{% else %}
+<form action="/plan/generate" method="post" hx-post="/plan/generate" hx-target="#plan-out" hx-swap="innerHTML"
+      class="bg-white rounded-2xl border border-slate-200 p-4 space-y-2 mb-3">
+  <label class="block text-sm">Durée (semaines)
+    <input type="number" name="n_weeks" value="4" class="w-full rounded-2xl border border-slate-200 px-3 py-2 mt-1"></label>
+  <button class="w-full rounded-2xl bg-brand-500 text-white font-semibold py-2">Générer le programme</button>
+</form>
+{% endif %}
+<div id="plan-out"></div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ t('auth.register') }} · fitai{% endblock %}
+{% block content %}
+<div class="max-w-sm mx-auto mt-10">
+  <h1 class="text-2xl font-bold text-violet-600 mb-6 text-center">{{ t('auth.register') }}</h1>
+  {% if error %}<p class="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-2 mb-4">{{ error }}</p>{% endif %}
+  <form action="/register" method="post" class="space-y-3">
+    <input name="username" placeholder="{{ t('auth.username') }}" required
+           class="w-full rounded-2xl border border-slate-200 px-4 py-3">
+    <input name="password" type="password" placeholder="{{ t('auth.password') }}" required
+           class="w-full rounded-2xl border border-slate-200 px-4 py-3">
+    <button class="w-full rounded-2xl bg-brand-500 text-white font-semibold py-3">{{ t('auth.register') }}</button>
+  </form>
+  <p class="text-center text-sm text-slate-500 mt-4">
+    <a href="/login" class="text-brand-600 font-medium">{{ t('auth.login') }}</a>
+  </p>
+</div>
+{% endblock %}

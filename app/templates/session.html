@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Séance · fitai{% endblock %}
+{% block header %}{{ t('nav.program') }}{% endblock %}
+{% block content %}
+<a href="/plan" class="text-sm text-slate-400">← Programme</a>
+<h1 class="text-xl font-bold mt-2 mb-1">{{ ps.title }}</h1>
+<p class="text-xs text-slate-400 mb-4">S{{ ps.week_index }} · J{{ ps.day_index }} · {{ ps.focus or '' }}</p>
+
+<div class="space-y-2 mb-5">
+  {% for ex in ps.exercises_json %}
+  <div class="bg-white rounded-2xl border border-slate-200 px-4 py-3">
+    <p class="font-medium">{{ ex.name }}</p>
+    <p class="text-xs text-slate-500">
+      {% if ex.sets %}{{ ex.sets }} séries{% endif %}
+      {% if ex.reps %}× {{ ex.reps }}{% endif %}
+      {% if ex.rest %} · repos {{ ex.rest }}{% endif %}
+      {% if ex.target_weight %} · {{ ex.target_weight }}{% endif %}
+    </p>
+  </div>
+  {% endfor %}
+</div>
+
+<form action="/workouts/log" method="post" class="bg-white rounded-2xl border border-slate-200 p-4 space-y-2">
+  <input type="hidden" name="planned_session_id" value="{{ ps.id }}">
+  <select name="status" class="w-full rounded-2xl border border-slate-200 px-3 py-2">
+    <option value="done">Terminée</option>
+    <option value="partial">Partielle</option>
+    <option value="skipped">Sautée</option>
+  </select>
+  <input name="rpe" placeholder="RPE 1-10" inputmode="numeric" class="w-full rounded-2xl border border-slate-200 px-3 py-2">
+  <input name="feeling" placeholder="Ressenti (ex: le genou tire)" class="w-full rounded-2xl border border-slate-200 px-3 py-2">
+  <textarea name="notes" placeholder="Notes" class="w-full rounded-2xl border border-slate-200 px-3 py-2"></textarea>
+  <button class="w-full rounded-2xl bg-brand-500 text-white font-semibold py-2">Enregistrer la séance</button>
+</form>
+{% endblock %}

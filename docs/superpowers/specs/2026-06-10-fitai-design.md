@@ -41,7 +41,7 @@ with a language selector for future locales. Units are **metric** (kg/cm).
   as history grows.
 - **Workout-session logging** (the data that grounds adaptation).
 - A **calorie/macro target calculator** (pure, testable) and **nutrition/food logging**
-  (LLM-estimated macros from free text).
+  (manual-first; optional **batched** LLM macro estimation, one call per day).
 - A **plan-centric dashboard** with graphs/indicators and a **quick-add FAB** for daily
   stats.
 
@@ -186,7 +186,8 @@ migration tool). `init_db()` also runs an **idempotent column-backfill** so an e
   appends a "ne propose pas à nouveau: X, Y" clause from an optional `exclude` list (stays
   stateless; titles ride on the request).
 - **`response_parser.py`** — lenient fenced-JSON extraction (locate the JSON block within
-  surrounding prose) → Pydantic for: plan, adapted plan, nutrition estimate. On failure: a
+  surrounding prose) → Pydantic for: plan, adapted plan, and a **batched** nutrition list
+  (`parse_nutrition_list_response` → one estimate per submitted food). On failure: a
   clear French message + re-paste box. **Never half-saves** (transactional).
 - **`security.py`** — password hash/verify + token generation (see §4).
 
@@ -204,7 +205,31 @@ copy-paste path share one parsing path.
 | **Generate plan** (`/plan/generate`) | build context → `complete()` → `parse_plan_response` → store proposals → render proposal cards; **re-roll** ("autre programme") | render prose prompt; user pastes JSON back → same parser |
 | **Activate plan** | chosen proposal → materialize PlannedSession rows | identical (post-parse) |
 | **Adapt plan** (`/plan/adapt`) | inject `progress.build_context_summary` + free-text feedback → `complete()` → parse adapted plan → supersede old, materialize new | prose prompt; paste back |
-| **Estimate nutrition** (`/nutrition/estimate`) | free-text meal → `complete()` → `{calories, protein, carbs, fat}` → pre-fill FoodLog row (editable before save) | prose prompt; paste back, or log manually |
+| **Estimate nutrition** (`/nutrition/estimate`) | **manual-first, batched**: macros are typed by default (0 calls); one explicit "Estimer les repas du jour" button sends all un-estimated foods for the day in a **single** `complete()` call → `parse_nutrition_list_response` → pre-fill each FoodLog row (editable before save) | prose prompt; paste back, or log manually |
+
+### LLM call points & cost control
+
+The API is called at **exactly three explicit user actions** — never on data entry or
+viewing:
+
+1. **Generate plan** (`/plan/generate`), plus the **re-roll** button (1 call each).
+2. **Adapt plan** (`/plan/adapt`).
+3. **Estimate nutrition** (`/nutrition/estimate`) — opt-in, **batched** (one call for all
+   un-estimated foods of the day), **manual entry needs no call**.
+
+Everything else is **0 API calls**: adding weight/steps/energy (FAB), logging a workout,
+editing goals, the dashboard, all trend graphs, and the **calorie/macro target calculator**
+(`nutrition.py`, deterministic math).
+
+**Workout-session feedback is free at capture.** When you log a session — `status`, `rpe`,
+`feeling`, and free-text `notes` (e.g. *"le genou tire"*, *"trop facile"*) — it is **only
+stored** in `WorkoutLog`; no call fires. That accumulated feedback is read later by
+`progress.build_context_summary` + the recent-window logs and folded into the **next
+`/plan/adapt` call**, so a week of session feedback costs **one** call when you choose to
+adapt — not one per session. The whole direct path is **hard-gated** —
+`ANTHROPIC_API_KEY` set *and* `use_llm_directly` on — otherwise every flow falls back to the
+zero-cost copy-paste path. Expected steady-state volume is low: ~1 plan-gen + ~1 adapt per
+week, plus at most one batched nutrition call per day for users who opt in.
 
 **Context compression (the answer to "do we need it for long-term tracking?"):** Yes.
 Adaptation/generation prompts are **bounded** = *compact long-term summary*
@@ -315,6 +340,9 @@ app/
   - Workout log: log a planned session → adherence reflects it.
   - Nutrition: estimate (mocked) → editable pre-fill → save FoodLog → totals vs target.
   - Fallback: `LLMError` and `ParseError` both fall back to the copy-paste prompt partial.
+  - **No-call assertion (cost):** posting a BodyMetric (weight/steps/energy), a WorkoutLog
+    (incl. free-text feedback), a goal, or a manual FoodLog must **not** invoke
+    `llm_client.complete` — asserted with a spy/mock that records zero calls.
 - **Fixtures:** a seeded user with profile/goal/metrics; sample LLM responses as test data
   files (plan, adapted plan, nutrition estimate).
 

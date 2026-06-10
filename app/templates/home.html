@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}fitai{% endblock %}
+{% block header %}fitai{% endblock %}
+{% block content %}
+<p class="text-sm text-slate-500">Bonjour, {{ user.username }}</p>
+
+<p class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mt-4 mb-2">Séance du jour</p>
+{% if today_session %}
+<a href="/workouts/session/{{ today_session.id }}"
+   class="block rounded-2xl p-5 mb-5 text-white shadow-lg shadow-brand-500/30"
+   style="background:linear-gradient(135deg,#1b1733,#2c2156)">
+  <span class="text-[11px] font-bold tracking-widest uppercase text-brand-400">
+    Semaine {{ today_session.week_index }} · {{ today_session.focus or 'séance' }}</span>
+  <h2 class="text-2xl font-extrabold mt-1">{{ today_session.title }}</h2>
+  <p class="text-sm opacity-80 mt-1">{{ today_session.exercises_json|length }} exercices</p>
+  <span class="inline-block mt-4 rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold">▶ Commencer la séance</span>
+</a>
+{% else %}
+<a href="/plan" class="block rounded-2xl bg-white border border-slate-200 p-5 mb-5 text-center text-slate-500">
+  Aucun programme actif — <span class="text-brand-600 font-medium">en générer un</span></a>
+{% endif %}
+
+{% if week_sessions %}
+<p class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-2">Cette semaine</p>
+<div class="flex gap-2 overflow-x-auto pb-2 mb-5">
+  {% for s in week_sessions %}
+  <a href="/workouts/session/{{ s.id }}" class="shrink-0 bg-white rounded-2xl border border-slate-200 px-3 py-2 text-center">
+    <span class="block text-[10px] text-brand-600 font-semibold">J{{ s.day_index }}</span>
+    <span class="block text-xs font-medium">{{ s.title[:10] }}</span>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+
+<p class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-2">Aujourd'hui</p>
+<div class="grid grid-cols-2 gap-3">
+  <div class="bg-white rounded-2xl border border-slate-200 p-4">
+    <p class="text-[11px] uppercase text-slate-400 font-semibold">Poids</p>
+    {% if trend.current is not none %}
+    <p class="text-2xl font-extrabold">{{ trend.current }}<span class="text-sm text-slate-400"> kg</span></p>
+    {% if trend.delta is not none %}<p class="text-xs font-bold {{ 'text-red-500' if trend.delta < 0 else 'text-slate-400' }}">{{ '%+.1f'|format(trend.delta) }} kg</p>{% endif %}
+    <canvas id="weightChart" height="60" data-points='{{ weight_points|tojson }}'></canvas>
+    {% else %}<p class="text-sm text-slate-400 mt-2">Pas encore de poids</p>{% endif %}
+  </div>
+  <div class="bg-white rounded-2xl border border-slate-200 p-4">
+    <p class="text-[11px] uppercase text-slate-400 font-semibold">Objectif</p>
+    {% if goal_pct is not none %}
+    <p class="text-2xl font-extrabold">{{ goal_pct }}%</p>
+    <div class="h-2 bg-slate-100 rounded-full overflow-hidden mt-2"><div class="h-full bg-brand-500" style="width: {{ goal_pct }}%"></div></div>
+    <p class="text-xs text-slate-400 mt-1">{{ goal.type }}</p>
+    {% else %}<a href="/goals" class="text-sm text-brand-600 mt-2 inline-block">Définir un objectif</a>{% endif %}
+  </div>
+</div>
+
+<script>document.addEventListener("DOMContentLoaded", () => lineChart("weightChart"));</script>
+{% endblock %}

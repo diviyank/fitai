@@ -1,5 +1,6 @@
-from datetime import date, datetime
-from typing import Optional
+from datetime import datetime
+from datetime import date as DateType
+from typing import Optional, Dict, Any
 from sqlalchemy import JSON
 from sqlmodel import SQLModel, Field, Column
 
@@ -23,7 +24,7 @@ class Profile(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id", index=True, unique=True)
     sex: str = "homme"
-    birth_date: Optional[date] = None
+    birth_date: Optional[DateType] = None
     height_cm: Optional[float] = None
     activity_level: str = "modere"
     language: str = "fr"
@@ -35,3 +36,17 @@ class Profile(SQLModel, table=True):
     session_length_min: int = 45
     calorie_target_override: Optional[int] = None
     use_llm_directly: bool = True
+
+
+class BodyMetric(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    date: DateType = Field(index=True)
+    weight_kg: Optional[float] = None
+    steps: Optional[int] = None
+    body_fat_pct: Optional[float] = None
+    measurements_json: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    energy: Optional[int] = None
+    sleep_hours: Optional[float] = None
+    soreness: Optional[int] = None
+    notes: str = ""

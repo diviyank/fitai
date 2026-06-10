@@ -5,7 +5,9 @@ services:
     ports:
       - "1313:1313"
     environment:
-      # ANTHROPIC_API_KEY: "sk-ant-..."   # optional; enables direct LLM mode
+      # Passed through from the shell running `docker compose` OR from a sibling .env
+      # file (compose auto-loads it). Empty => app falls back to copy-paste prompts.
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
       FITAI_LLM_MODEL: "claude-sonnet-4-6"
     volumes:
       - fitai-data:/data

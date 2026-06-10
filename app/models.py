@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from datetime import date as DateType
 from typing import Optional, Dict, Any
 from sqlalchemy import JSON
@@ -75,3 +75,37 @@ class FoodLog(SQLModel, table=True):
     carbs_g: Optional[float] = None
     fat_g: Optional[float] = None
     source: str = "manual"  # manual | llm
+
+
+class TrainingPlan(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    params_json: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    proposals_json: list = Field(default_factory=list, sa_column=Column(JSON))
+    plan_json: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    status: str = "proposed"  # proposed | active | superseded | cancelled
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class PlannedSession(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    plan_id: int = Field(foreign_key="trainingplan.id", index=True)
+    week_index: int
+    day_index: int
+    title: str
+    focus: Optional[str] = None
+    exercises_json: list = Field(default_factory=list, sa_column=Column(JSON))
+    scheduled_date: Optional[DateType] = None
+
+
+class WorkoutLog(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    planned_session_id: Optional[int] = Field(default=None, foreign_key="plannedsession.id")
+    date: DateType = Field(index=True)
+    status: str = "done"  # done | skipped | partial
+    performed_json: list = Field(default_factory=list, sa_column=Column(JSON))
+    rpe: Optional[int] = None
+    feeling: str = ""
+    notes: str = ""

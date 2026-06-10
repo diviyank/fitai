@@ -22,12 +22,6 @@ def _redirect_to_login(request: Request, exc: NotAuthenticated):
     return RedirectResponse("/login", status_code=303)
 
 
-# TODO(Phase 8): Replace this placeholder with app/routers/home.py
-@app.get("/", response_class=HTMLResponse)
-def _home_placeholder(request: Request, user: User = Depends(current_user)):
-    return templates.TemplateResponse("base.html", {"request": request, "user": user})
-
-
 @app.on_event("startup")
 def _startup() -> None:
     init_db()

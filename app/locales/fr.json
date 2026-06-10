@@ -1,0 +1,17 @@
+{
+  "app.title": "fitai",
+  "nav.home": "Accueil",
+  "nav.metrics": "Suivi",
+  "nav.program": "Programme",
+  "nav.nutrition": "Nutrition",
+  "nav.settings": "Réglages",
+  "action.add": "Ajouter",
+  "action.save": "Enregistrer",
+  "action.delete": "Supprimer",
+  "action.logout": "Déconnexion",
+  "auth.login": "Connexion",
+  "auth.register": "Créer un compte",
+  "auth.username": "Nom d'utilisateur",
+  "auth.password": "Mot de passe",
+  "error.parse": "Réponse non reconnue — vérifiez que vous avez copié le bloc complet (le bloc ```json ... ```)."
+}

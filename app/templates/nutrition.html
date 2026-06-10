@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.nutrition') }} · fitai{% endblock %}
+{% block header %}{{ t('nav.nutrition') }}{% endblock %}
+{% block content %}
+<h1 class="text-xl font-bold mb-4">Nutrition</h1>
+
+<div class="bg-white rounded-2xl border border-slate-200 p-4 mb-4">
+  {% if targets %}
+  <div class="flex justify-between text-sm mb-1">
+    <span class="font-medium">{{ totals.calories }} / {{ targets.calories }} kcal</span>
+    <span class="text-slate-500">P {{ totals.protein_g|round|int }} · G {{ totals.carbs_g|round|int }} · L {{ totals.fat_g|round|int }}</span>
+  </div>
+  <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+    <div class="h-full bg-brand-500" style="width: {{ (100 * totals.calories / targets.calories) if targets.calories else 0 }}%"></div>
+  </div>
+  <p class="text-xs text-slate-400 mt-1">Cible protéines : {{ targets.protein_g }} g</p>
+  {% else %}
+  <p class="text-sm text-slate-500">Complète ton profil (sexe, date de naissance, taille) et enregistre un poids pour voir tes cibles caloriques.</p>
+  {% endif %}
+</div>
+
+<form action="/nutrition/add" method="post" class="bg-white rounded-2xl border border-slate-200 p-4 space-y-2 mb-4">
+  <input name="description" placeholder="Aliment / repas (ex: poulet riz brocoli)" required
+         class="w-full rounded-2xl border border-slate-200 px-3 py-2">
+  <div class="flex gap-2">
+    <select name="meal_slot" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
+      {% for s in meal_slots %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+    </select>
+    <input name="calories" placeholder="kcal (option.)" inputmode="numeric" class="rounded-2xl border border-slate-200 px-3 py-2 w-32">
+  </div>
+  <div class="flex gap-2">
+    <input name="protein_g" placeholder="P g" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
+    <input name="carbs_g" placeholder="G g" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
+    <input name="fat_g" placeholder="L g" inputmode="decimal" class="rounded-2xl border border-slate-200 px-3 py-2 flex-1">
+  </div>
+  <button class="w-full rounded-2xl bg-brand-500 text-white font-semibold py-2">{{ t('action.add') }}</button>
+</form>
+
+<form action="/nutrition/estimate" method="post" hx-post="/nutrition/estimate" hx-target="#estimate-out" hx-swap="innerHTML" class="mb-3">
+  <button class="w-full rounded-2xl border border-brand-500 text-brand-600 font-semibold py-2">
+    Estimer les repas du jour (1 appel)</button>
+</form>
+<div id="estimate-out" class="mb-4"></div>
+
+<div class="space-y-2">
+  {% for f in foods %}
+  <div class="bg-white rounded-2xl border border-slate-200 px-4 py-3 flex justify-between text-sm">
+    <span class="font-medium">{{ f.description }}</span>
+    <span class="text-slate-500">{% if f.calories %}{{ f.calories }} kcal{% else %}—{% endif %}</span>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

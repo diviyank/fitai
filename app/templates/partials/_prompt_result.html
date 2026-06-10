@@ -1,0 +1,7 @@
+<div class="bg-white rounded-2xl border border-slate-200 p-4">
+  {% if notice %}<p class="text-sm text-amber-600 mb-2">{{ notice }}</p>{% endif %}
+  <textarea id="prompt-text" rows="10" readonly
+            class="w-full text-xs font-mono rounded-xl border border-slate-200 p-2">{{ prompt }}</textarea>
+  <button onclick="copyText('prompt-text', this)"
+          class="mt-2 w-full rounded-2xl bg-brand-500 text-white font-semibold py-2">Copier le prompt</button>
+</div>

@@ -62,3 +62,16 @@ class Goal(SQLModel, table=True):
     status: str = "active"  # active | achieved | abandoned
     notes: str = ""
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class FoodLog(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    date: DateType = Field(index=True)
+    meal_slot: Optional[str] = None  # see enums.MEAL_SLOTS
+    description: str
+    calories: Optional[int] = None
+    protein_g: Optional[float] = None
+    carbs_g: Optional[float] = None
+    fat_g: Optional[float] = None
+    source: str = "manual"  # manual | llm

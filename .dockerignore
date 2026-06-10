@@ -1,4 +1,6 @@
 .git
+.venv
+venv
 data
 .superpowers
 __pycache__

@@ -1,0 +1,4 @@
+services:
+  fitai:
+    build: .
+    image: fitai:local

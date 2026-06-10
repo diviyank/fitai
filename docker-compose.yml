@@ -1,0 +1,15 @@
+services:
+  fitai:
+    image: ghcr.io/OWNER/fitai:latest   # replace OWNER with your GitHub owner/org
+    container_name: fitai
+    ports:
+      - "1313:1313"
+    environment:
+      # ANTHROPIC_API_KEY: "sk-ant-..."   # optional; enables direct LLM mode
+      FITAI_LLM_MODEL: "claude-sonnet-4-6"
+    volumes:
+      - fitai-data:/data
+    restart: unless-stopped
+
+volumes:
+  fitai-data:

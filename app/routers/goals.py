@@ -13,7 +13,18 @@ router = APIRouter()
 
 
 def _f(v: str) -> Optional[float]:
-    return float(v) if v and v.strip() else None
+    """Parse a numeric field, tolerating free text (returns None instead of raising)."""
+    try:
+        return float(v) if v and v.strip() else None
+    except ValueError:
+        return None
+
+
+def _date(v: str) -> Optional[date]:
+    try:
+        return datetime.strptime(v, "%Y-%m-%d").date() if v and v.strip() else None
+    except ValueError:
+        return None
 
 
 def _latest_weight(session: Session, user: User) -> Optional[float]:
@@ -41,13 +52,18 @@ def goals_page(request: Request, session: Session = Depends(get_session),
 def add_goal(session: Session = Depends(get_session), user: User = Depends(current_user),
              type: str = Form("general"), target_value: str = Form(""),
              target_date: str = Form(""), baseline_value: str = Form(""), notes: str = Form("")):
+    target = _f(target_value)
+    notes = notes.strip()
+    # A free-text objective (e.g. "perdre du ventre") isn't a number — keep it in notes
+    # rather than crashing or silently dropping it.
+    if target is None and target_value.strip():
+        notes = f"{target_value.strip()}\n{notes}".strip()
     baseline = _f(baseline_value)
     if baseline is None:
         baseline = _latest_weight(session, user)
     goal = Goal(
-        user_id=user.id, type=type, target_value=_f(target_value),
-        target_date=datetime.strptime(target_date, "%Y-%m-%d").date() if target_date else None,
-        baseline_value=baseline, notes=notes)
+        user_id=user.id, type=type, target_value=target,
+        target_date=_date(target_date), baseline_value=baseline, notes=notes)
     session.add(goal); session.commit()
     return RedirectResponse("/goals", status_code=303)
 

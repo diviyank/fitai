@@ -8,8 +8,10 @@
     display: inline-block; animation: fitai-spin .7s linear infinite;
   }
   @keyframes fitai-spin { to { transform: rotate(360deg); } }
-  /* htmx sets [disabled] on the button while the request is in flight. */
-  button[disabled] { opacity: .6; cursor: not-allowed; }
+  /* htmx adds .htmx-request to the <form> while its request is in flight.
+     hx-disabled-elt="find button" does NOT work on htmx 1.9.x (find/closest
+     keywords arrived in htmx 2.0), so disable the button via this class instead. */
+  form.htmx-request button { opacity: .55; pointer-events: none; cursor: not-allowed; }
 </style>
 <div id="{{ id }}" class="htmx-indicator flex items-center justify-center gap-2 text-sm text-slate-500 my-3">
   <span class="fitai-spinner" aria-hidden="true"></span>

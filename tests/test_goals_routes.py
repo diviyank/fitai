@@ -13,6 +13,26 @@ def test_create_goal_and_list(authed, session, user):
     assert "lose_weight" in page.text or "78" in page.text
 
 
+def test_create_goal_with_freetext_target(authed, session, user):
+    r = authed.post("/goals/add", data={
+        "type": "custom", "target_value": "perdre du ventre",
+        "target_date": "", "baseline_value": "", "notes": "cet été"}, follow_redirects=False)
+    assert r.status_code == 303
+    g = session.exec(select(Goal).where(Goal.user_id == user.id)).first()
+    assert g is not None
+    assert g.target_value is None
+    assert "perdre du ventre" in g.notes and "cet été" in g.notes
+
+
+def test_create_goal_tolerates_bad_date(authed, session, user):
+    r = authed.post("/goals/add", data={
+        "type": "general", "target_value": "", "target_date": "pas une date",
+        "baseline_value": "", "notes": ""}, follow_redirects=False)
+    assert r.status_code == 303
+    g = session.exec(select(Goal).where(Goal.user_id == user.id)).first()
+    assert g is not None and g.target_date is None
+
+
 def test_retire_goal(authed, session, user):
     authed.post("/goals/add", data={"type": "general", "target_value": "", "target_date": "",
                                      "baseline_value": "", "notes": ""})

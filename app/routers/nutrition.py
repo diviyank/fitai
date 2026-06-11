@@ -104,7 +104,8 @@ def estimate(request: Request, session: Session = Depends(get_session),
     prompt = pb.build_nutrition_estimate([f.description for f in pending])
     if not (llm_client.is_configured() and p.use_llm_directly):
         return templates.TemplateResponse("partials/_prompt_result.html",
-                                          {"request": request, "prompt": prompt, "notice": None})
+                                          {"request": request,
+                                           "prompt": pb.with_clarifying_questions(prompt), "notice": None})
     work = generation.build_nutrition_work(json_prompt=prompt, food_ids=[f.id for f in pending])
     jobs.start("nutrition", {}, prompt, work)
     return render_panel(request, "nutrition", jobs.latest(session, "nutrition"), session=session)

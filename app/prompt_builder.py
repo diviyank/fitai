@@ -2,6 +2,21 @@
 
 import json as _json
 
+CLARIFYING_QUESTIONS_CLAUSE = (
+    "## Avant de répondre\n"
+    "Si des précisions sur mes besoins, mes objectifs ou mes contraintes amélioreraient "
+    "nettement le résultat, pose-moi d'abord 2 ou 3 questions courtes et attends mes "
+    "réponses. Si la demande est déjà claire, réponds directement. Dans tous les cas, "
+    "le résultat final doit suivre exactement le format demandé ci-dessous.\n\n"
+)
+
+
+def with_clarifying_questions(prompt: str) -> str:
+    """Prepend an invitation for the LLM to ask 2-3 clarifying questions before
+    answering. Applied ONLY to copy-paste display prompts (the Q&A happens in the
+    user's own LLM chat); never to the direct-call prompt, which must stay JSON-only."""
+    return CLARIFYING_QUESTIONS_CLAUSE + prompt
+
 NUTRITION_JSON_SCHEMA = (
     '{\n'
     '  "items": [\n'

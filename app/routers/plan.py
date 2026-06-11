@@ -56,7 +56,8 @@ def _load_context(session: Session, user: User):
 
 def _prompt_partial(request: Request, prompt: str, notice: str = None):
     return templates.TemplateResponse("partials/_prompt_result.html",
-                                      {"request": request, "prompt": prompt, "notice": notice})
+                                      {"request": request, "prompt": pb.with_clarifying_questions(prompt),
+                                       "notice": notice})
 
 
 def _materialize(session: Session, user: User, plan: TrainingPlan, proposal: dict) -> None:

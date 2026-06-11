@@ -63,3 +63,24 @@ def test_estimate_falls_back_to_prompt_on_error(authed, fake_llm):
     r = authed.post("/nutrition/estimate")
     assert r.status_code == 200
     assert "indisponible" in r.text.lower() or "```" in r.text  # copy-paste prompt shown
+
+
+def test_nutrition_copy_paste_invites_clarifying_questions(authed, session, user):
+    from datetime import date
+    from app.models import FoodLog
+    session.add(FoodLog(user_id=user.id, date=date.today(), description="pomme", source="manual"))
+    session.commit()
+    r = authed.post("/nutrition/estimate")
+    assert r.status_code == 200
+    assert "Avant de répondre" in r.text
+
+
+def test_nutrition_direct_call_prompt_excludes_clarifying_questions(authed, session, user, fake_llm):
+    from datetime import date
+    from app.models import FoodLog
+    session.add(FoodLog(user_id=user.id, date=date.today(), description="pomme", source="manual"))
+    session.commit()
+    fake_llm["reply"] = json.dumps({"items": [
+        {"description": "pomme", "calories": 52, "protein_g": 0, "carbs_g": 14, "fat_g": 0}]})
+    authed.post("/nutrition/estimate")
+    assert "Avant de répondre" not in fake_llm["prompts"][-1]

@@ -22,6 +22,11 @@ def render_panel(request: Request, kind: str, job, *, session=None, **extra) -> 
     }
     from .. import panels
     ctx.update(panels.extra_context(kind, params, result))
+    if kind == "plan" and result and result.get("plan_id") and session is not None:
+        from ..models import TrainingPlan
+        plan = session.get(TrainingPlan, result["plan_id"])
+        if plan:
+            ctx.update({"plan": plan, "plans": plan.proposals_json})
     ctx.update(extra)
     return templates.TemplateResponse("partials/_panel.html", ctx)
 

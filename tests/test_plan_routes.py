@@ -24,9 +24,11 @@ def test_generate_stores_proposals(authed, session, user, fake_llm):
     _prep_profile(session, user)
     fake_llm["reply"] = THREE_PLANS
     r = authed.post("/plan/generate", data={"n_weeks": "4"})
-    assert r.status_code == 200 and fake_llm["calls"] == 1
+    assert r.status_code == 200 and fake_llm["calls"] == 1 and 'id="panel-plan"' in r.text
     plan = session.exec(select(TrainingPlan).where(TrainingPlan.user_id == user.id)).first()
     assert len(plan.proposals_json) == 3 and plan.status == "proposed"
+    # Verify proposals render in the panel
+    assert "Plan A" in r.text
 
 
 def test_activate_materializes_sessions(authed, session, user, fake_llm):
@@ -90,7 +92,7 @@ def test_regenerate_makes_one_call_and_excludes_seen(authed, session, user, fake
             {"week": 1, "day": 1, "title": "Nouveau Plan", "exercises": []}]}
         for x in ["X", "Y"]]})
     r = authed.post(f"/plan/{plan.id}/regenerate")
-    assert r.status_code == 200
+    assert r.status_code == 200 and 'id="panel-plan"' in r.text
     assert fake_llm["calls"] == initial_calls + 1  # exactly one additional call
     # Verify the prompt contains exclusion markers for the prior labels
     last_prompt = fake_llm["prompts"][-1]

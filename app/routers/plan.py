@@ -1,12 +1,13 @@
+import json
 from datetime import date
 from typing import Optional
 from fastapi import APIRouter, Depends, Request, Form, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlmodel import Session, select
 from ..db import get_session
-from ..models import User, Profile, Goal, BodyMetric, WorkoutLog, TrainingPlan, PlannedSession
+from ..models import User, Profile, Goal, BodyMetric, WorkoutLog, TrainingPlan, PlannedSession, GenerationJob
 from ..auth import current_user
-from .. import prompt_builder as pb, response_parser as rp, llm_client
+from .. import prompt_builder as pb, response_parser as rp, llm_client, jobs, generation
 from ..progress import build_context_summary
 from ..main import templates
 
@@ -78,8 +79,10 @@ def plan_page(request: Request, session: Session = Depends(get_session),
         sessions = session.exec(
             select(PlannedSession).where(PlannedSession.plan_id == plan.id)
             .order_by(PlannedSession.week_index, PlannedSession.day_index)).all()
+    from .jobs import render_panel
+    plan_panel = render_panel(request, "plan", jobs.latest(session, "plan"), session=session).body.decode()
     return templates.TemplateResponse("plan.html", {
-        "request": request, "user": user, "plan": plan, "sessions": sessions})
+        "request": request, "user": user, "plan": plan, "sessions": sessions, "plan_panel": plan_panel})
 
 
 @router.post("/plan/generate", response_class=HTMLResponse)
@@ -89,15 +92,10 @@ def generate(request: Request, session: Session = Depends(get_session),
     prompt = pb.build_plan(profile, goal, summary, {"n_weeks": n_weeks})
     if not (llm_client.is_configured() and p.use_llm_directly):
         return _prompt_partial(request, prompt)
-    try:
-        parsed = rp.parse_plan_response(llm_client.complete(prompt))
-    except (llm_client.LLMError, rp.ParseError):
-        return _prompt_partial(request, prompt, FALLBACK_NOTICE)
-    plan = TrainingPlan(user_id=user.id, params_json={"n_weeks": n_weeks},
-                        proposals_json=[pl.model_dump() for pl in parsed.plans], status="proposed")
-    session.add(plan); session.commit(); session.refresh(plan)
-    return templates.TemplateResponse("partials/_plan_proposals.html",
-                                      {"request": request, "plan": plan, "plans": plan.proposals_json})
+    work = generation.build_plan_work(json_prompt=prompt, params={"n_weeks": n_weeks}, user_id=user.id)
+    jobs.start("plan", {"n_weeks": n_weeks}, prompt, work)
+    from .jobs import render_panel
+    return render_panel(request, "plan", jobs.latest(session, "plan"), session=session)
 
 
 @router.post("/plan/{plan_id}/regenerate", response_class=HTMLResponse)
@@ -119,8 +117,8 @@ def regenerate(plan_id: int, request: Request, session: Session = Depends(get_se
                                            "notice": FALLBACK_NOTICE})
     plan.proposals_json = [pl.model_dump() for pl in parsed.plans]
     session.add(plan); session.commit(); session.refresh(plan)
-    return templates.TemplateResponse("partials/_plan_proposals.html",
-                                      {"request": request, "plan": plan, "plans": plan.proposals_json})
+    from .jobs import render_panel
+    return render_panel(request, "plan", jobs.latest(session, "plan"), session=session)
 
 
 @router.post("/plan/parse", response_class=HTMLResponse)
@@ -134,8 +132,13 @@ def parse_pasted(request: Request, session: Session = Depends(get_session),
     plan = TrainingPlan(user_id=user.id, params_json={"n_weeks": n_weeks},
                         proposals_json=[pl.model_dump() for pl in parsed.plans], status="proposed")
     session.add(plan); session.commit(); session.refresh(plan)
-    return templates.TemplateResponse("partials/_plan_proposals.html",
-                                      {"request": request, "plan": plan, "plans": plan.proposals_json})
+    job = GenerationJob(kind="plan", status="done", params_json=json.dumps({"n_weeks": n_weeks}), prompt="",
+                        result_json=json.dumps({"plan_id": plan.id}))
+    session.add(job)
+    session.commit()
+    session.refresh(job)
+    from .jobs import render_panel
+    return render_panel(request, "plan", job, session=session)
 
 
 @router.post("/plan/{plan_id}/activate")

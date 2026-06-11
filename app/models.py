@@ -109,3 +109,15 @@ class WorkoutLog(SQLModel, table=True):
     rpe: Optional[int] = None
     feeling: str = ""
     notes: str = ""
+
+
+class GenerationJob(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    kind: str = Field(index=True)
+    status: str = "running"  # running | done | error
+    params_json: str = "{}"
+    prompt: str = ""
+    result_json: Optional[str] = None
+    notice: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)

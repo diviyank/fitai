@@ -12,6 +12,8 @@ from .models import User
 BASE_DIR = Path(__file__).parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 templates.env.globals["t"] = t
+import json as _json
+templates.env.filters["from_json"] = lambda s: _json.loads(s) if s else {}
 
 app = FastAPI(title="fitai")
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
@@ -25,11 +27,13 @@ def _redirect_to_login(request: Request, exc: NotAuthenticated):
 @app.on_event("startup")
 def _startup() -> None:
     init_db()
+    from . import jobs
+    jobs.mark_stale_running()
 
 
 def register_routers() -> None:
     from importlib import import_module
-    for name in ("auth", "home", "metrics", "goals", "plan", "workouts", "nutrition", "settings"):
+    for name in ("auth", "home", "metrics", "goals", "plan", "workouts", "nutrition", "settings", "jobs"):
         if not (BASE_DIR / "routers" / f"{name}.py").exists():
             continue
         module = import_module(f"app.routers.{name}")

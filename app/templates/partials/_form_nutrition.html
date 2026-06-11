@@ -1,0 +1,5 @@
+<form hx-post="/nutrition/estimate" hx-target="#panel-nutrition" hx-swap="outerHTML" class="mb-3">
+  <button {% if running %}disabled{% endif %}
+          class="w-full rounded-2xl border border-brand-500 text-brand-600 font-semibold py-2">
+    {{ t('nutrition.estimate') }} (1 appel)</button>
+</form>

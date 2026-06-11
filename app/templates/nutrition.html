@@ -36,13 +36,7 @@
   <button class="w-full rounded-2xl bg-brand-500 text-white font-semibold py-2">{{ t('action.add') }}</button>
 </form>
 
-<form action="/nutrition/estimate" method="post" hx-post="/nutrition/estimate" hx-target="#estimate-out" hx-swap="innerHTML"
-      hx-indicator="#estimate-spinner" hx-disabled-elt="find button" class="mb-3">
-  <button class="w-full rounded-2xl border border-brand-500 text-brand-600 font-semibold py-2">
-    {{ t('nutrition.estimate') }} (1 appel)</button>
-</form>
-{% with id = "estimate-spinner" %}{% include "partials/_llm_spinner.html" %}{% endwith %}
-<div id="estimate-out" class="mb-4"></div>
+{{ nutrition_panel|safe }}
 
 <div class="space-y-2">
   {% for f in foods %}

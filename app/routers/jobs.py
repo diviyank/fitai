@@ -1,6 +1,6 @@
 import json
 from fastapi import APIRouter, Request, Depends
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from sqlmodel import Session
 
 from ..db import get_session
@@ -33,4 +33,7 @@ def render_panel(request: Request, kind: str, job, *, session=None, **extra) -> 
 
 @router.get("/jobs/{kind}/panel", response_class=HTMLResponse)
 def panel(kind: str, request: Request, session: Session = Depends(get_session)):
-    return render_panel(request, kind, jobs.latest(session, kind), session=session)
+    job = jobs.latest(session, kind)
+    if kind == "nutrition" and job and job.status == "done":
+        return Response(status_code=204, headers={"HX-Redirect": "/nutrition"})
+    return render_panel(request, kind, job, session=session)

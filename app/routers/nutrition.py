@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 from ..db import get_session
 from ..models import User, Profile, FoodLog, BodyMetric, Goal
 from ..auth import current_user
-from .. import enums, nutrition, prompt_builder as pb, response_parser as rp, llm_client
+from .. import enums, nutrition, prompt_builder as pb, response_parser as rp, llm_client, generation, jobs
 from ..main import templates
 
 router = APIRouter()
@@ -60,11 +60,19 @@ def _totals(foods: list[FoodLog]) -> dict:
 
 def _render_page(request, session, user, extra=None):
     foods = _today_foods(session, user)
+    nutrition_job = jobs.latest(session, "nutrition")
+    nutrition_panel = render_panel(request, "nutrition", nutrition_job, session=session).body.decode()
     ctx = {"request": request, "user": user, "foods": foods, "totals": _totals(foods),
-           "targets": _targets(session, user), "meal_slots": enums.MEAL_SLOTS}
+           "targets": _targets(session, user), "meal_slots": enums.MEAL_SLOTS,
+           "nutrition_panel": nutrition_panel}
     if extra:
         ctx.update(extra)
     return templates.TemplateResponse("nutrition.html", ctx)
+
+
+def render_panel(request, kind, job, *, session=None, **extra):
+    from .jobs import render_panel as _render_panel
+    return _render_panel(request, kind, job, session=session, **extra)
 
 
 @router.get("/nutrition", response_class=HTMLResponse)
@@ -97,17 +105,6 @@ def estimate(request: Request, session: Session = Depends(get_session),
     if not (llm_client.is_configured() and p.use_llm_directly):
         return templates.TemplateResponse("partials/_prompt_result.html",
                                           {"request": request, "prompt": prompt, "notice": None})
-    try:
-        parsed = rp.parse_nutrition_list_response(llm_client.complete(prompt))
-    except (llm_client.LLMError, rp.ParseError):
-        return templates.TemplateResponse("partials/_prompt_result.html",
-                                          {"request": request, "prompt": prompt, "notice": FALLBACK_NOTICE})
-    for food, est in zip(pending, parsed.items):
-        food.calories = est.calories
-        food.protein_g = est.protein_g
-        food.carbs_g = est.carbs_g
-        food.fat_g = est.fat_g
-        food.source = "llm"
-        session.add(food)
-    session.commit()
-    return Response(status_code=204, headers={"HX-Redirect": "/nutrition"})
+    work = generation.build_nutrition_work(json_prompt=prompt, food_ids=[f.id for f in pending])
+    jobs.start("nutrition", {}, prompt, work)
+    return render_panel(request, "nutrition", jobs.latest(session, "nutrition"), session=session)

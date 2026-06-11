@@ -44,3 +44,29 @@ def build_plan_work(*, json_prompt: str, params: dict, user_id: int):
             return {"plan_id": plan.id}
 
     return work
+
+
+def build_nutrition_work(*, json_prompt: str, food_ids: list[int], system: str | None = None):
+    """Build a work() function for nutrition estimation that updates FoodLog rows."""
+    kw = _llm_kwargs("nutrition", system)
+
+    def work() -> dict:
+        parsed = rp.parse_nutrition_list_response(llm_client.complete(json_prompt, **kw))
+        from sqlmodel import Session
+        from .db import get_engine
+        from .models import FoodLog
+        with Session(get_engine()) as s:
+            foods = [s.get(FoodLog, fid) for fid in food_ids]
+            for food, est in zip(foods, parsed.items):
+                if food is None:
+                    continue
+                food.calories = est.calories
+                food.protein_g = est.protein_g
+                food.carbs_g = est.carbs_g
+                food.fat_g = est.fat_g
+                food.source = "llm"
+                s.add(food)
+            s.commit()
+        return {"updated": len(parsed.items)}
+
+    return work

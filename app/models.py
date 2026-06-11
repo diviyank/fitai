@@ -35,7 +35,7 @@ class Profile(SQLModel, table=True):
     days_per_week: int = 3
     session_length_min: int = 45
     calorie_target_override: Optional[int] = None
-    use_llm_directly: bool = True
+    use_llm_directly: bool = False  # copy-paste is the default; direct Claude is opt-in
 
 
 class BodyMetric(SQLModel, table=True):

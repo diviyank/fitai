@@ -47,12 +47,17 @@ def authed(client, user, session):
 
 
 @pytest.fixture
-def fake_llm(monkeypatch):
+def fake_llm(monkeypatch, session, user):
     """Force the direct-LLM path on and stub the Anthropic call.
 
-    Set state['reply'] to a JSON string for success, or to an LLMError instance for failure.
-    state['calls'] counts invocations; state['prompts'] records each prompt sent."""
+    Enables the per-user toggle explicitly because the Profile default is now copy-paste
+    (opt-in). Set state['reply'] to a JSON string for success, or to an LLMError instance
+    for failure. state['calls'] counts invocations; state['prompts'] records each prompt."""
     from app import llm_client, jobs
+    from app.seed import ensure_profile
+    prof = ensure_profile(session, user)
+    prof.use_llm_directly = True
+    session.add(prof); session.commit()
     state = {"reply": "", "prompts": [], "calls": 0}
 
     def _complete(prompt, **kw):

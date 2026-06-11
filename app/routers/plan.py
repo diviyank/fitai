@@ -111,10 +111,10 @@ def regenerate(plan_id: int, request: Request, session: Session = Depends(get_se
         return _prompt_partial(request, prompt)
     try:
         parsed = rp.parse_plan_response(llm_client.complete(prompt))
-    except (llm_client.LLMError, rp.ParseError):
+    except (llm_client.LLMError, rp.ParseError) as exc:
         return templates.TemplateResponse("partials/_plan_proposals.html",
                                           {"request": request, "plan": plan, "plans": plan.proposals_json,
-                                           "notice": FALLBACK_NOTICE})
+                                           "notice": getattr(exc, "notice", FALLBACK_NOTICE)})
     plan.proposals_json = [pl.model_dump() for pl in parsed.plans]
     session.add(plan); session.commit(); session.refresh(plan)
     from .jobs import render_panel
@@ -168,8 +168,8 @@ def adapt(request: Request, session: Session = Depends(get_session),
         return _prompt_partial(request, prompt)
     try:
         parsed = rp.parse_adapted_plan_response(llm_client.complete(prompt))
-    except (llm_client.LLMError, rp.ParseError):
-        return _prompt_partial(request, prompt, FALLBACK_NOTICE)
+    except (llm_client.LLMError, rp.ParseError) as exc:
+        return _prompt_partial(request, prompt, getattr(exc, "notice", FALLBACK_NOTICE))
     current.status = "superseded"; session.add(current)
     new_plan = TrainingPlan(user_id=user.id, params_json=current.params_json,
                             proposals_json=[parsed.plan.model_dump()], status="proposed")

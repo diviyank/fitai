@@ -17,5 +17,5 @@ def test_registering_creates_a_profile_with_defaults(db):
     user = auth.create_user(db, "alice", "pw")
     prof = db.exec(select(Profile).where(Profile.user_id == user.id)).first()
     assert prof is not None
-    assert prof.language == "fr" and prof.use_llm_directly is True
+    assert prof.language == "fr" and prof.use_llm_directly is False  # copy-paste default
     assert prof.days_per_week == 3
